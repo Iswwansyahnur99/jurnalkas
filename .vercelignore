@@ -1,0 +1,11 @@
+# Mengabaikan semua file yang berhubungan dengan frontend dari build backend
+frontend/
+node_modules/
+
+# Mengabaikan file dan direktori git
+.git/
+.gitignore
+
+# Mengabaikan file yang tidak perlu
+README.md
+test_result.md
