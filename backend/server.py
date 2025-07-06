@@ -11,6 +11,7 @@ from typing import List, Optional
 import uuid
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
+from serverless_wsgi import handle
 
 app.add_middleware(
     CORSMiddleware,
