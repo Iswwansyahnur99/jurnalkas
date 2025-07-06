@@ -107,51 +107,63 @@ user_problem_statement: "Build a mini-site for TVRI Berkeringat Badminton commun
 backend:
   - task: "Transaction Model and Database Schema"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created Transaction model with id, tanggal, keterangan, jenis, jumlah fields. Database schema setup with MongoDB connection."
+      - working: true
+        agent: "testing"
+        comment: "Transaction model is correctly implemented with all required fields. MongoDB connection is working properly. Successfully created and retrieved transactions."
         
   - task: "Admin Authentication API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented login endpoint with hardcoded admin/admin credentials. Returns JWT-like token for session management."
+      - working: true
+        agent: "testing"
+        comment: "Admin authentication API is working correctly. Successfully authenticated with admin/admin credentials and received token. Correctly rejected invalid credentials."
         
   - task: "Transaction CRUD API Endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created GET /api/transactions, POST /api/transactions, GET /api/summary endpoints. Indonesian date formatting included."
+      - working: true
+        agent: "testing"
+        comment: "All transaction CRUD endpoints are working correctly. GET /api/transactions returns transactions with proper date formatting. POST /api/transactions successfully creates new transactions. GET /api/summary correctly calculates financial summary."
         
   - task: "Indonesian Currency Formatting"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Backend returns raw numbers, frontend handles Rp 50.000 formatting with Indonesian locale."
+      - working: true
+        agent: "testing"
+        comment: "Backend correctly returns raw number values for currency. Date formatting uses day-month-year format as expected."
 
 frontend:
   - task: "Main Cash Journal Page"
