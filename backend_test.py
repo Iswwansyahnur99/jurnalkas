@@ -244,6 +244,175 @@ class BackendTester:
             self.log_test("Unauthorized Transaction Creation", False, f"Status code: {response.status_code}, Response: {response.text}")
         
         return False
+        
+    def test_delete_transaction_success(self):
+        """Test deleting a transaction with valid admin token"""
+        if not self.admin_token:
+            self.log_test("Delete Transaction Success", False, "Admin token not available, login first")
+            return False
+            
+        # First, get all transactions to find one to delete
+        url = f"{API_URL}/transactions"
+        response = requests.get(url)
+        
+        if response.status_code != 200 or not response.json():
+            self.log_test("Delete Transaction Success", False, "No transactions available to delete")
+            return False
+            
+        # Get the first transaction ID
+        transaction_id = response.json()[0]["id"]
+        
+        # Now delete the transaction
+        delete_url = f"{API_URL}/transactions/{transaction_id}"
+        headers = {"Authorization": f"Bearer {self.admin_token}"}
+        
+        response = requests.delete(delete_url, headers=headers)
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            if "message" in response_data and "berhasil dihapus" in response_data["message"]:
+                self.log_test("Delete Transaction Success", True, f"Successfully deleted transaction: {transaction_id}")
+                return True
+            else:
+                self.log_test("Delete Transaction Success", False, f"Unexpected response message: {response_data}")
+        else:
+            self.log_test("Delete Transaction Success", False, f"Status code: {response.status_code}, Response: {response.text}")
+        
+        return False
+        
+    def test_delete_transaction_unauthorized(self):
+        """Test deleting a transaction without authentication"""
+        # First, get all transactions to find one to delete
+        url = f"{API_URL}/transactions"
+        response = requests.get(url)
+        
+        if response.status_code != 200 or not response.json():
+            self.log_test("Delete Transaction Unauthorized", False, "No transactions available to test with")
+            return False
+            
+        # Get the first transaction ID
+        transaction_id = response.json()[0]["id"]
+        
+        # Try to delete without authentication
+        delete_url = f"{API_URL}/transactions/{transaction_id}"
+        response = requests.delete(delete_url)
+        
+        if response.status_code == 401 or response.status_code == 403:
+            self.log_test("Delete Transaction Unauthorized", True, "Correctly rejected unauthorized transaction deletion")
+            return True
+        else:
+            self.log_test("Delete Transaction Unauthorized", False, f"Status code: {response.status_code}, Response: {response.text}")
+        
+        return False
+        
+    def test_delete_transaction_invalid_id(self):
+        """Test deleting a transaction with an invalid ID"""
+        if not self.admin_token:
+            self.log_test("Delete Transaction Invalid ID", False, "Admin token not available, login first")
+            return False
+            
+        # Use a random UUID that doesn't exist
+        invalid_id = "00000000-0000-0000-0000-000000000000"
+        
+        delete_url = f"{API_URL}/transactions/{invalid_id}"
+        headers = {"Authorization": f"Bearer {self.admin_token}"}
+        
+        response = requests.delete(delete_url, headers=headers)
+        
+        if response.status_code == 404:
+            self.log_test("Delete Transaction Invalid ID", True, "Correctly returned 404 for non-existent transaction")
+            return True
+        else:
+            self.log_test("Delete Transaction Invalid ID", False, f"Status code: {response.status_code}, Response: {response.text}")
+        
+        return False
+        
+    def test_data_consistency_after_deletion(self):
+        """Test data consistency after deleting a transaction"""
+        if not self.admin_token:
+            self.log_test("Data Consistency After Deletion", False, "Admin token not available, login first")
+            return False
+            
+        # First, get all transactions and the current summary
+        transactions_url = f"{API_URL}/transactions"
+        summary_url = f"{API_URL}/summary"
+        
+        transactions_response = requests.get(transactions_url)
+        summary_response = requests.get(summary_url)
+        
+        if transactions_response.status_code != 200 or summary_response.status_code != 200:
+            self.log_test("Data Consistency After Deletion", False, "Failed to get initial transactions or summary")
+            return False
+            
+        initial_transactions = transactions_response.json()
+        initial_summary = summary_response.json()
+        
+        if not initial_transactions:
+            self.log_test("Data Consistency After Deletion", False, "No transactions available to delete")
+            return False
+            
+        # Get the first transaction to delete
+        transaction_to_delete = initial_transactions[0]
+        transaction_id = transaction_to_delete["id"]
+        
+        # Calculate expected summary after deletion
+        expected_pemasukan = initial_summary["total_pemasukan"]
+        expected_pengeluaran = initial_summary["total_pengeluaran"]
+        
+        if transaction_to_delete["jenis"] == "pemasukan":
+            expected_pemasukan -= transaction_to_delete["jumlah"]
+        else:  # pengeluaran
+            expected_pengeluaran -= transaction_to_delete["jumlah"]
+            
+        expected_saldo = expected_pemasukan - expected_pengeluaran
+        
+        # Delete the transaction
+        delete_url = f"{API_URL}/transactions/{transaction_id}"
+        headers = {"Authorization": f"Bearer {self.admin_token}"}
+        
+        delete_response = requests.delete(delete_url, headers=headers)
+        
+        if delete_response.status_code != 200:
+            self.log_test("Data Consistency After Deletion", False, f"Failed to delete transaction: {delete_response.text}")
+            return False
+            
+        # Get updated transactions and summary
+        updated_transactions_response = requests.get(transactions_url)
+        updated_summary_response = requests.get(summary_url)
+        
+        if updated_transactions_response.status_code != 200 or updated_summary_response.status_code != 200:
+            self.log_test("Data Consistency After Deletion", False, "Failed to get updated transactions or summary")
+            return False
+            
+        updated_transactions = updated_transactions_response.json()
+        updated_summary = updated_summary_response.json()
+        
+        # Verify transaction count decreased by 1
+        if len(updated_transactions) != len(initial_transactions) - 1:
+            self.log_test("Data Consistency After Deletion", False, 
+                          f"Expected {len(initial_transactions) - 1} transactions after deletion, got {len(updated_transactions)}")
+            return False
+            
+        # Verify deleted transaction is not in the list
+        for transaction in updated_transactions:
+            if transaction["id"] == transaction_id:
+                self.log_test("Data Consistency After Deletion", False, "Deleted transaction still appears in transaction list")
+                return False
+                
+        # Verify summary is updated correctly (with small tolerance for floating point)
+        pemasukan_correct = abs(updated_summary["total_pemasukan"] - expected_pemasukan) < 0.01
+        pengeluaran_correct = abs(updated_summary["total_pengeluaran"] - expected_pengeluaran) < 0.01
+        saldo_correct = abs(updated_summary["saldo"] - expected_saldo) < 0.01
+        
+        if pemasukan_correct and pengeluaran_correct and saldo_correct:
+            self.log_test("Data Consistency After Deletion", True, 
+                          f"Data is consistent after deletion. New summary: {updated_summary}")
+            return True
+        else:
+            self.log_test("Data Consistency After Deletion", False, 
+                          f"Summary inconsistent after deletion. Expected: {expected_pemasukan}/{expected_pengeluaran}/{expected_saldo}, " +
+                          f"Got: {updated_summary['total_pemasukan']}/{updated_summary['total_pengeluaran']}/{updated_summary['saldo']}")
+            return False
 
     def run_all_tests(self):
         """Run all tests in sequence"""
@@ -261,6 +430,12 @@ class BackendTester:
         
         # Test authentication protection
         self.test_unauthorized_transaction_creation()
+        
+        # Test DELETE transaction endpoint
+        self.test_delete_transaction_unauthorized()
+        self.test_delete_transaction_invalid_id()
+        self.test_delete_transaction_success()
+        self.test_data_consistency_after_deletion()
         
         # Print summary
         print("\n===== Test Summary =====")
