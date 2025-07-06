@@ -119,6 +119,14 @@ async def create_transaction(transaction: TransactionCreate, token: str = Depend
     await db.transactions.insert_one(transaction_obj.dict())
     return transaction_obj
 
+@api_router.delete("/transactions/{transaction_id}")
+async def delete_transaction(transaction_id: str, token: str = Depends(verify_admin)):
+    result = await db.transactions.delete_one({"id": transaction_id})
+    if result.deleted_count == 1:
+        return {"message": "Transaksi berhasil dihapus"}
+    else:
+        raise HTTPException(status_code=404, detail="Transaksi tidak ditemukan")
+
 @api_router.get("/")
 async def root():
     return {"message": "TVRI Berkeringat Badminton API"}
