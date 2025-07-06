@@ -1,0 +1,18 @@
+# File: netlify.toml (Versi Perbaikan)
+
+[build]
+  # Netlify akan masuk ke folder 'frontend'
+  base = "frontend"
+  # Dari dalam 'frontend', jalankan perintah build
+  command = "npm run build"
+  # Hasil build ada di folder 'build' (path ini relatif terhadap 'base')
+  publish = "build"
+
+[functions]
+  # Folder backend Anda
+  directory = "backend"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
