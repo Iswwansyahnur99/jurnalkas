@@ -164,6 +164,21 @@ backend:
       - working: true
         agent: "testing"
         comment: "Backend correctly returns raw number values for currency. Date formatting uses day-month-year format as expected."
+        
+  - task: "DELETE Transaction Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented DELETE /api/transactions/{transaction_id} endpoint with admin authentication."
+      - working: true
+        agent: "testing"
+        comment: "DELETE transaction endpoint is working correctly. Successfully deleted transactions with admin authentication. Properly rejects unauthorized requests with 401 status code. Returns 404 for non-existent transaction IDs. Data consistency is maintained after deletion - GET /api/transactions and GET /api/summary return updated data."
 
 frontend:
   - task: "Main Cash Journal Page"
