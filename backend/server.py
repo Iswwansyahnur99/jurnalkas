@@ -11,13 +11,16 @@ from typing import List, Optional
 import uuid
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-from serverless_wsgi import handle
+
+# 1. Buat aplikasi FastAPI terlebih dahulu
 app = FastAPI()
 
+# 2. Baru tambahkan middleware ke aplikasi yang sudah ada
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://jurnaltvriberkeringat.netlify.app"
+        # Ganti dengan URL Vercel Anda jika perlu, "*" juga bisa untuk pengembangan
+        "*" 
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -28,14 +31,12 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+# Pastikan MONGO_URL dan DB_NAME sudah diatur di Environment Variables Vercel
+mongo_url = os.environ.get('MONGO_URL')
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.environ.get('DB_NAME')]
 
-# Create the main app without a prefix
-app = FastAPI()
-
-# Create a router with the /api prefix
+# Buat router tanpa prefix
 api_router = APIRouter()
 
 # Security
@@ -147,7 +148,6 @@ async def root():
 # Include the router in the main app
 app.include_router(api_router)
 
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -158,8 +158,3 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
-def handler(event, context):
-    """
-    Fungsi ini akan menjadi entry point untuk Netlify Functions.
-    """
-    return handle(event, context, app)
