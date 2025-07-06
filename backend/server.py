@@ -10,44 +10,38 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
 from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware
 
 # 1. Buat aplikasi FastAPI terlebih dahulu
 app = FastAPI()
 
-# 2. Baru tambahkan middleware ke aplikasi yang sudah ada
+# 2. Baru tambahkan middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        # Ganti dengan URL Vercel Anda jika perlu, "*" juga bisa untuk pengembangan
-        "*" 
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# --- Konfigurasi lainnya ---
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-# Pastikan MONGO_URL dan DB_NAME sudah diatur di Environment Variables Vercel
 mongo_url = os.environ.get('MONGO_URL')
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME')]
 
-# Buat router tanpa prefix
+# 3. KEMBALIKAN prefix="/api" untuk Vercel
 api_router = APIRouter(prefix="/api")
 
-# Security
 security = HTTPBearer()
 
-# Define Models
+# --- Models (Tetap sama) ---
 class Transaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     tanggal: datetime = Field(default_factory=datetime.utcnow)
     keterangan: str
-    jenis: str  # "pemasukan" or "pengeluaran"
+    jenis: str
     jumlah: float
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -79,13 +73,12 @@ class Summary(BaseModel):
     total_pengeluaran: float
     saldo: float
 
-# Admin authentication
+# --- Routes (Tetap sama) ---
 async def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if credentials.credentials != "admin_session_token":
         raise HTTPException(status_code=401, detail="Invalid authentication")
     return credentials.credentials
 
-# Routes
 @api_router.post("/login", response_model=LoginResponse)
 async def login(login_data: AdminLogin):
     if login_data.username == "admin" and login_data.password == "admin":
@@ -97,7 +90,6 @@ async def login(login_data: AdminLogin):
 async def get_transactions():
     transactions = await db.transactions.find().sort("tanggal", -1).to_list(1000)
     result = []
-    
     for transaction in transactions:
         trans_response = TransactionResponse(
             id=transaction["id"],
@@ -109,17 +101,14 @@ async def get_transactions():
             pengeluaran=transaction["jumlah"] if transaction["jenis"] == "pengeluaran" else None
         )
         result.append(trans_response)
-    
     return result
 
 @api_router.get("/summary", response_model=Summary)
 async def get_summary():
     transactions = await db.transactions.find().to_list(1000)
-    
     total_pemasukan = sum(t["jumlah"] for t in transactions if t["jenis"] == "pemasukan")
     total_pengeluaran = sum(t["jumlah"] for t in transactions if t["jenis"] == "pengeluaran")
     saldo = total_pemasukan - total_pengeluaran
-    
     return Summary(
         total_pemasukan=total_pemasukan,
         total_pengeluaran=total_pengeluaran,
@@ -145,14 +134,10 @@ async def delete_transaction(transaction_id: str, token: str = Depends(verify_ad
 async def root():
     return {"message": "TVRI Berkeringat Badminton API"}
 
-# Include the router in the main app
+# --- Finalisasi (Tetap sama) ---
 app.include_router(api_router)
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
