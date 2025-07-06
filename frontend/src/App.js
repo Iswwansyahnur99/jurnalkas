@@ -229,8 +229,8 @@ const PaymentPage = () => {
                 />
               </div>
               <div className="qris-info">
-                <p><strong>Nama Penerima:</strong> Kas TVRI Berkeringat</p>
-                <p><strong>Untuk:</strong> Iuran Kas Komunitas Badminton</p>
+                <p><strong>Nama Penerima:</strong> Muhammad Iswansyah Nur (PIC)</p>
+                <p><strong>Untuk:</strong> Iuran Kas TVRI Berkeringat Edisi Badminton</p>
               </div>
             </div>
             
@@ -240,7 +240,7 @@ const PaymentPage = () => {
                 className="whatsapp-button"
               >
                 <span className="whatsapp-icon">📱</span>
-                Sudah Bayar? Konfirmasi ke Bendahara
+                Sudah Bayar? Konfirmasi ke PIC
               </button>
             </div>
           </div>
@@ -249,7 +249,7 @@ const PaymentPage = () => {
       
       <footer className="footer">
         <div className="container">
-          <p>&copy; 2025 TVRI Berkeringat Badminton Community</p>
+          <p>&copy; 2025 Kumuda Experience (PT. Kumuda Kreasi Nusantara)</p>
         </div>
       </footer>
     </div>
