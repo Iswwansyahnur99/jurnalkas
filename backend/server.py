@@ -35,7 +35,7 @@ db = client[os.environ['DB_NAME']]
 app = FastAPI()
 
 # Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter()
 
 # Security
 security = HTTPBearer()
