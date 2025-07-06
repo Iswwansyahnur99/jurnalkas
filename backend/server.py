@@ -157,3 +157,8 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+def handler(event, context):
+    """
+    Fungsi ini akan menjadi entry point untuk Netlify Functions.
+    """
+    return handle(event, context, app)
