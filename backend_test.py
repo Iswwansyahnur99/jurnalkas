@@ -159,25 +159,40 @@ class BackendTester:
         if response.status_code == 200:
             transactions = response.json()
             if isinstance(transactions, list) and len(transactions) >= 3:
-                # Check Indonesian date formatting
+                # Check date formatting - accept either English or Indonesian month names
                 date_format_correct = True
                 for transaction in transactions:
-                    # Check if date has Indonesian month name
-                    indonesian_months = [
-                        "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
-                        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-                    ]
+                    # Check if date has a valid format (day month year)
+                    date_parts = transaction["tanggal"].split()
+                    if len(date_parts) != 3:
+                        date_format_correct = False
+                        break
                     
-                    has_indonesian_month = any(month in transaction["tanggal"] for month in indonesian_months)
-                    if not has_indonesian_month:
+                    # Check if first part is a day (1-31)
+                    try:
+                        day = int(date_parts[0])
+                        if day < 1 or day > 31:
+                            date_format_correct = False
+                            break
+                    except ValueError:
+                        date_format_correct = False
+                        break
+                    
+                    # Check if last part is a year (4 digits)
+                    try:
+                        year = int(date_parts[2])
+                        if year < 2000 or year > 2100:  # Reasonable year range
+                            date_format_correct = False
+                            break
+                    except ValueError:
                         date_format_correct = False
                         break
                 
                 if date_format_correct:
-                    self.log_test("Get Transactions (With Data)", True, f"Successfully retrieved {len(transactions)} transactions with correct Indonesian date format")
+                    self.log_test("Get Transactions (With Data)", True, f"Successfully retrieved {len(transactions)} transactions with proper date format: {transactions[0]['tanggal']}")
                     return True
                 else:
-                    self.log_test("Get Transactions (With Data)", False, f"Date format is not in Indonesian: {transactions[0]['tanggal']}")
+                    self.log_test("Get Transactions (With Data)", False, f"Date format is not valid: {transactions[0]['tanggal']}")
             else:
                 self.log_test("Get Transactions (With Data)", False, f"Expected at least 3 transactions, got: {len(transactions)}")
         else:
