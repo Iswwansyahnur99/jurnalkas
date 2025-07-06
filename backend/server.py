@@ -12,6 +12,7 @@ import uuid
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from serverless_wsgi import handle
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
