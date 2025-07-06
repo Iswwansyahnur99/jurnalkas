@@ -35,7 +35,7 @@ const Header = ({ title }) => (
       <div className="header-content">
         <div className="logo">
           <h1>TVRI BERKERINGAT</h1>
-          <p>Badminton Community</p>
+          <p>Edisi Badminton</p>
         </div>
         <nav className="nav">
           <Link to="/" className="nav-link">Jurnal Kas</Link>
@@ -109,7 +109,7 @@ const HomePage = () => {
   if (loading) {
     return (
       <div className="App">
-        <Header title="Jurnal Kas Komunitas Badminton TVRI Berkeringat" />
+        <Header title="Jurnal Kas TVRI Berkeringat edisi Badminton" />
         <div className="loading">Memuat data...</div>
       </div>
     );
@@ -117,7 +117,7 @@ const HomePage = () => {
 
   return (
     <div className="App">
-      <Header title="Jurnal Kas Komunitas Badminton TVRI Berkeringat" />
+      <Header title="Jurnal Kas TVRI Berkeringat Edisi Badminton" />
       
       <main className="main-content">
         <div className="container">
@@ -192,7 +192,7 @@ const HomePage = () => {
       
       <footer className="footer">
         <div className="container">
-          <p>&copy; 2025 TVRI Berkeringat Badminton Community</p>
+          <p>&copy; 2025 Kumuda Experience (PT. Kumuda Kreasi Nusantara)</p>
           <Link to="/admin" className="admin-link">Admin Login</Link>
         </div>
       </footer>
