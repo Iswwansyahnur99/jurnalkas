@@ -459,6 +459,23 @@ body {
   font-size: 1.2rem;
 }
 
+/* Delete Button */
+.delete-button {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+  background: #fecaca;
+  transform: scale(1.1);
+}
+
 /* Footer */
 .footer {
   background: #1f2937;
