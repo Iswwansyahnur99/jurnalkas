@@ -3,8 +3,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const API = "/api";
 
 // Format currency in Indonesian Rupiah
 const formatRupiah = (amount) => {
