@@ -56,10 +56,17 @@ const HomePage = () => {
     saldo: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     fetchData();
+    checkAdminStatus();
   }, []);
+
+  const checkAdminStatus = () => {
+    const token = localStorage.getItem('adminToken');
+    setIsAdmin(!!token);
+  };
 
   const fetchData = async () => {
     try {
@@ -74,6 +81,28 @@ const HomePage = () => {
     } catch (error) {
       console.error('Error fetching data:', error);
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTransaction = async (transactionId) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.delete(`${API}/transactions/${transactionId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      // Refresh data after deletion
+      fetchData();
+      alert('Transaksi berhasil dihapus');
+    } catch (error) {
+      alert('Gagal menghapus transaksi');
+      console.error('Error deleting transaction:', error);
     }
   };
 
@@ -125,6 +154,7 @@ const HomePage = () => {
                       <th>Keterangan</th>
                       <th>Pemasukan</th>
                       <th>Pengeluaran</th>
+                      {isAdmin && <th>Aksi</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -139,6 +169,17 @@ const HomePage = () => {
                         <td className="amount-cell pengeluaran">
                           {transaction.pengeluaran ? formatRupiah(transaction.pengeluaran) : '-'}
                         </td>
+                        {isAdmin && (
+                          <td>
+                            <button 
+                              onClick={() => handleDeleteTransaction(transaction.id)}
+                              className="delete-button"
+                              title="Hapus transaksi"
+                            >
+                              🗑️
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
