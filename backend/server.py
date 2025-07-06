@@ -37,7 +37,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME')]
 
 # Buat router tanpa prefix
-api_router = APIRouter()
+api_router = APIRouter(prefix="/api")
 
 # Security
 security = HTTPBearer()
