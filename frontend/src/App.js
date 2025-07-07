@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { supabase } from './supabaseClient';
 
 const API = "/api";
 
@@ -68,20 +68,37 @@ const HomePage = () => {
   };
 
   const fetchData = async () => {
-    try {
-      const [transactionsRes, summaryRes] = await Promise.all([
-        axios.get(`${API}/transactions`),
-        axios.get(`${API}/summary`)
-      ]);
-      
-      setTransactions(transactionsRes.data);
-      setSummary(summaryRes.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+
+  const { data: transactions, error } = await supabase
+    .from('transactions') // Nama tabel Anda di Supabase
+    .select('*')
+    .order('tanggal', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching data:', error);
+  } else {
+    // Logika untuk menampilkan data dan summary (sama seperti sebelumnya)
+    const formattedTransactions = transactions.map(t => ({
+      ...t,
+      tanggal: new Date(t.tanggal).toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      }),
+      pemasukan: t.jenis === 'pemasukan' ? t.jumlah : null,
+      pengeluaran: t.jenis === 'pengeluaran' ? t.jumlah : null
+    }));
+    setTransactions(formattedTransactions);
+
+    const totalPemasukan = transactions.filter(t => t.jenis === 'pemasukan').reduce((acc, t) => acc + t.jumlah, 0);
+    const totalPengeluaran = transactions.filter(t => t.jenis === 'pengeluaran').reduce((acc, t) => acc + t.jumlah, 0);
+    setSummary({
+      total_pemasukan: totalPemasukan,
+      total_pengeluaran: totalPengeluaran,
+      saldo: totalPemasukan - totalPengeluaran
+    });
+  }
+  setLoading(false);
+};
 
   const handleDeleteTransaction = async (transactionId) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
