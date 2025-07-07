@@ -1,0 +1,13 @@
+# File: netlify.toml
+
+# Perintah untuk membangun frontend Anda
+[build]
+  base    = "frontend"      # Beri tahu Netlify untuk masuk ke folder frontend
+  command = "npm run build" # Jalankan perintah build
+  publish = "frontend/build"  # Folder hasil build yang akan ditampilkan
+
+# Aturan untuk aplikasi React
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
