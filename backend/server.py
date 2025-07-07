@@ -13,6 +13,9 @@ from datetime import datetime
 
 # 1. Buat aplikasi FastAPI terlebih dahulu
 app = FastAPI()
+@app.get("/")
+def read_root():
+    return {"message": "Hello World"}
 
 # 2. Baru tambahkan middleware
 app.add_middleware(
