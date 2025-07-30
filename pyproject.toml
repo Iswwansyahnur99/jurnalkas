@@ -1,13 +1,16 @@
-# File: netlify.toml
+[tool.poetry]
+name = "jurnalkas"
+version = "0.1.0"
+description = "Aplikasi Jurnal Kas Sederhana"
+authors = ["Iwan Syah <iwansyah@example.com>"] # Ganti dengan nama dan email Anda
+readme = "README.md"
 
-# Perintah untuk membangun frontend Anda
-[build]
-  base    = "frontend"      # Beri tahu Netlify untuk masuk ke folder frontend
-  command = "npm run build" # Jalankan perintah build
-  publish = "frontend/build"  # Folder hasil build yang akan ditampilkan
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "*"
+Flask-SQLAlchemy = "*"
+Flask-Login = "*"
 
-# Aturan untuk aplikasi React
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
